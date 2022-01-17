@@ -1,0 +1,127 @@
+﻿@page "/rokonsag"
+@using Intalk_220117.Data;
+@inject ApplicationDbService dbService
+
+<EditForm Model="@kapcsolatModel" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="HandleInValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <h5>Válassz ki egy embert:</h5>
+    <select class="form-control selectpicker" style="max-width:300px; display:inline" @onchange=@SelectedEmberChanged>
+        <option value="base">-Válassz egy embert-</option>
+        @foreach (var ember in elerhetoEmberek)
+        {
+            <option value="@ember.Id">@ember.Nev</option>
+        }
+    </select>
+    @if (kivalasztottEmber != null && lehetsegesAnyak != null && lehetsegesApak != null)
+    {
+
+        <h5>Válassz ki egy apát:</h5>
+        <select class="form-control selectpicker" style="max-width:300px; display:inline" @onchange=@SelectedApaChanged>
+            @foreach (var apa in lehetsegesApak)
+            {
+                <option value="@apa.Id">@apa.Nev</option>
+            }
+        </select>
+
+        <h5>Válassz ki egy anyát:</h5>
+        <select class="form-control selectpicker" style="max-width:300px; display:inline" @onchange=@SelectedAnyaChanged>
+            @foreach (var anya in lehetsegesAnyak)
+            {
+                <option value="@anya.Id">@anya.Nev</option>
+            }
+        </select>
+    }
+
+
+    @if (message != null)
+    {
+        string additionalClass = "danger";
+        if (message.Type == MessageType.Siker)
+        {
+            additionalClass = "success";
+        }
+        <div class="alert alert-@additionalClass d-flex justify-content-between">
+            @message.Text
+            <button class="btn btn-outline-info" type="submit" @onclick="@(()=>message = null)">X</button>
+        </div>
+    }
+
+<button class="btn btn-primary" type="submit"> Hozzáadás</button>
+</EditForm>
+
+@code {
+    Kapcsolat kapcsolatModel;
+    List<Ember> elerhetoEmberek;
+    List<Ember> emberek;
+    UserMessage message;
+    List<Ember> lehetsegesApak;
+    List<Ember> lehetsegesAnyak;
+    Ember kivalasztottEmber;
+
+    protected override void OnInitialized()
+    {
+        kapcsolatModel = new Kapcsolat();
+        elerhetoEmberek = dbService.GetAllUnusedEmber();
+        emberek = dbService.GetAllEmber();
+    }
+
+
+    private void SelectedEmberChanged(ChangeEventArgs e)
+    {
+        message = null;
+        if(e.Value.ToString() != "base")
+        {
+            kivalasztottEmber = emberek.FirstOrDefault(x => x.Id.ToString() == e.Value.ToString());
+
+            lehetsegesApak = new List<Ember>();
+            lehetsegesAnyak = new List<Ember>();
+
+            foreach (var ember in emberek)
+            {
+                if (ember.Id != kivalasztottEmber.Id)
+                {
+                    if (ember.Nem == "Férfi")
+                    {
+                        lehetsegesApak.Add(ember);
+                    }
+                    else
+                    {
+                        lehetsegesAnyak.Add(ember);
+                    }
+                }
+            }
+        }
+        else
+        {
+            kivalasztottEmber = new Ember();
+            kapcsolatModel = new Kapcsolat();
+        }
+    }
+
+    private void SelectedApaChanged(ChangeEventArgs e)
+    {
+        message = null;
+        kapcsolatModel.ApjaId = int.Parse(e.Value.ToString());
+    }
+    private void SelectedAnyaChanged(ChangeEventArgs e)
+    {
+        message = null;
+        kapcsolatModel.AnyjaId = int.Parse(e.Value.ToString());
+    }
+
+
+
+    public void HandleValidSubmit()
+    {
+        message = null;
+        dbService.AddKapcsolat(kapcsolatModel);
+        kapcsolatModel = new Kapcsolat();
+        elerhetoEmberek = dbService.GetAllUnusedEmber();
+    }
+
+    public void HandleInValidSubmit()
+    {
+        message = null;
+    }
+}
