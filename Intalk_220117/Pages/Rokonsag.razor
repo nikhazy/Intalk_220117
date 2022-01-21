@@ -58,6 +58,8 @@
     List<Ember> lehetsegesApak;
     List<Ember> lehetsegesAnyak;
     Ember kivalasztottEmber;
+    Ember kivalasztottApa;
+    Ember kivalasztottAnya;
 
     protected override void OnInitialized()
     {
@@ -91,10 +93,28 @@
                     }
                 }
             }
+            if (lehetsegesAnyak.Count > 0)
+            {
+                kivalasztottAnya = lehetsegesAnyak[0];
+            }
+            else
+            {
+                kivalasztottAnya = new Ember();
+            }
+            if (lehetsegesApak.Count > 0)
+            {
+                kivalasztottApa = lehetsegesApak[0];
+            }
+            else
+            {
+                kivalasztottApa = new Ember();
+            }
         }
         else
         {
             kivalasztottEmber = new Ember();
+            kivalasztottApa = new Ember();
+            kivalasztottAnya = new Ember();
             kapcsolatModel = new Kapcsolat();
         }
     }
@@ -102,11 +122,13 @@
     private void SelectedApaChanged(ChangeEventArgs e)
     {
         message = null;
+        kivalasztottApa.Id = int.Parse(e.Value.ToString());
         kapcsolatModel.ApjaId = int.Parse(e.Value.ToString());
     }
     private void SelectedAnyaChanged(ChangeEventArgs e)
     {
         message = null;
+        kivalasztottAnya.Id = int.Parse(e.Value.ToString());
         kapcsolatModel.AnyjaId = int.Parse(e.Value.ToString());
     }
 
@@ -115,6 +137,9 @@
     public void HandleValidSubmit()
     {
         message = null;
+        kapcsolatModel.EmberId = kivalasztottEmber.Id;
+        kapcsolatModel.ApjaId = kivalasztottApa.Id;
+        kapcsolatModel.AnyjaId = kivalasztottAnya.Id;
         dbService.AddKapcsolat(kapcsolatModel);
         kapcsolatModel = new Kapcsolat();
         elerhetoEmberek = dbService.GetAllUnusedEmber();

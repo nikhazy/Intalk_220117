@@ -39,7 +39,7 @@ namespace Intalk_220117.Data
         public bool DeleteEmber(int id)
         {
             var part = _db.Emberek.FirstOrDefault(x => x.Id == id);
-            if (_db.Kapcsolotabla.Where(x => x.EmberId == id || x.ApjaId == id || x.AnyjaId == id).Count() == 0)
+            if (_db.Kapcsolotabla.Where(x => x.EmberId == id || x.ApjaId == id || x.AnyjaId == id).Count() == 0 && part != null)
             {
                 _db.Emberek.Remove(part);
                 _db.SaveChanges();
