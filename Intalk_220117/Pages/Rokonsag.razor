@@ -140,9 +140,16 @@
         kapcsolatModel.EmberId = kivalasztottEmber.Id;
         kapcsolatModel.ApjaId = kivalasztottApa.Id;
         kapcsolatModel.AnyjaId = kivalasztottAnya.Id;
-        dbService.AddKapcsolat(kapcsolatModel);
-        kapcsolatModel = new Kapcsolat();
-        elerhetoEmberek = dbService.GetAllUnusedEmber();
+        if(kapcsolatModel.EmberId != 0 && kapcsolatModel.ApjaId != 0 && kapcsolatModel.AnyjaId != 0)
+        {
+            dbService.AddKapcsolat(kapcsolatModel);
+            kapcsolatModel = new Kapcsolat();
+            elerhetoEmberek = dbService.GetAllUnusedEmber();
+        }
+        else
+        {
+            message = new UserMessage("A gyerekek és a szülők kiválasztása is feltétel!",MessageType.Hiba);
+        }
     }
 
     public void HandleInValidSubmit()
